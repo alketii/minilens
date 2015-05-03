@@ -27,7 +27,8 @@ export var TILE_COLLECT = 2
 export var TILE_SINK = 2 
 export var TILE_LADDER = 1
 var is_goal = true # Do we have to remove the box from the list of goals?
-var can_move_in = 5 # We freese te box for the first few frames
+var is_registered_as_goal = false # Did we add the box to the list of goals?
+var can_move_in = 5 # We freese the box for the first few frames
 #some classes (e.g. other scripts)
 var box_class = get_script()
 var player_class = preload("res://scripts/player.gd")
@@ -61,15 +62,18 @@ func destroy(var by): # Called whenever the box is destroyed
 
 func stop_move():
 	movement = 0
+	can_move_in = 5
 
 func _fixed_process(delta):
 	if(can_move_in > 0):
 		can_move_in = can_move_in - 1
-		if(can_move_in <= 0 && moveable):
+		if(can_move_in <= 0 && moveable && !is_registered_as_goal):
 			get_node("../../../level_holder").goal_add(goal_type) # When we can move, we add a goal to the level
+			is_registered_as_goal = true # Prevent double-registering
 		return
 	if movement == 0: # We aren't moveing right now
 		var current_position = get_pos()/64
+		current_position = Vector2(round(current_position.x), floor(current_position.y))
 		#fall
 		var check_bottom = tilemap.get_cell(current_position.x, current_position.y + 1)
 		var check_overlap = tilemap.get_cell(current_position.x, current_position.y)
@@ -79,7 +83,7 @@ func _fixed_process(delta):
 			var collider_name = ray_bottom.get_collider().get_name()
 			if(collider_name.substr(0,6) == "flower"): # When we fall into a flower
 				move_down = true
-				ray_bottom.get_collider().destroy(goal_type)
+				ray_bottom.get_collider().destroy("flower")
 			elif collider_name.substr(0,11) == "bomb_pickup": # When we fall into a bomb
 				if ray_check_bottom.is_colliding() and ray_check_bottom.get_collider():
 					if(ray_bottom.get_collider() extends box_class):

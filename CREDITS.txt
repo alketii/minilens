@@ -6,12 +6,11 @@ Authors
     fry- - Graphics leader, code, level design
 
 Special thanks to:
-    Godot Engine
-    Kenney
     Calinou
     Obani
     Kermer
     adolson
+    est31
 
 Kenney - http://kenney.nl - for the most graphical assets
 Michel Baradari - http://opengameart.org/content/2-high-quality-explosions - for explosion sounds
