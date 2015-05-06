@@ -7,7 +7,7 @@ var to
 var sprite
 var locked = true
 var was_locked = false
-export var locked_timeout = 1
+export var locked_timeout = 1.0
 var lock_left = 0.1
 var show_locked = true
 var c_rot = 0.0
@@ -26,6 +26,7 @@ func _fixed_process(delta):
 	lock_left = lock_left - delta
 	if(!to):
 		to = get_node(to_teleport_path)
+		return
 	if(ray_overlap.is_colliding() && ray_overlap.get_collider()): # We have to teleport something
 		if(!locked && !to.locked): # No locked teleports
 			var collider = ray_overlap.get_collider()

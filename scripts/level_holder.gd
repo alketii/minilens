@@ -19,9 +19,10 @@ var viewport # The Viewport
 var tile_map_acid_y # When we extend the tilemap, we need to know on which Y we should place the acid
 var tile_map_acid_x_start # When we extend the tilemap, we need to know on which Y we should place the acid
 var tile_map_acid_x_end # When we extend the tilemap, we need to know on which Y we should place the acid
-var musics = ["music_1.ogg","music_2.ogg"] # The possible background music files
+var sample_player
 var turns = 0 # How many turns passed from the start
 var has_music = true
+var has_sounds = true
 
 func load_level(var pack, var level): # Load level N from pack P
 	current_level = level
@@ -37,6 +38,7 @@ func load_level(var pack, var level): # Load level N from pack P
 	for type in goals_amount_by_type:
 		var goals_node = get_node("../gui/CanvasLayer/").get_node(type)# Get node like ../gui/CanvasLayer/<type>
 		goals_node.hide()
+	get_node("../gui/CanvasLayer/bombs").hide()
 	goals_amount_by_type = {}
 	add_child(level_node) # Add that node to the scene
 	player.set_pos(level_node.get_node("start").get_pos()) # Teleport the player to his new location
@@ -141,6 +143,10 @@ func goal_add(var type=""): # Add one more goal
 			goals_node.show()
 			goals_node.get_node("Label").set_text(str(goals_taken_by_type[type]," / ",goals_amount_by_type[type]))
 
+func play_sample(var name):
+	if(has_sounds):
+		sample_player.play(name, false)
+
 func _input(event):
 	if JS.get_digital("back") || (event.is_action("retry") && event.is_pressed() && !event.is_echo()):
 		popup_btn1_pressed()
@@ -155,6 +161,7 @@ func _ready():
 	JS = get_node("/root/SUTjoystick")
 	player = get_node("../player_holder/player")
 	viewport = get_viewport()
+	sample_player = get_node("../sample")
 	# Removes the focus from the retry button
 	get_node("../gui/CanvasLayer/retry").set_focus_mode(Control.FOCUS_NONE)
 	# Connect the popup buttons
@@ -165,10 +172,10 @@ func _ready():
 	set_process(true)
 	viewport.connect("size_changed",self,"window_resize")
 	JS.emulate_mouse(false) # Turn off mouse emulation in-game
-	if(bool(int(get_node("/root/global").read_options()["music"]))):
-		has_music = true
-	else:
-		has_music = false
+	# Music and sounds
+	var options = get_node("/root/global").read_options()
+	has_music = bool(int(options["music"]))
+	has_sounds = bool(int(options["sound"]))
 
 func _process(delta): # Move the acid
 	acid_animation_pos = acid_animation_pos + delta
